@@ -1,0 +1,6 @@
+---
+homepage: https://dumbdata.co/
+documentation: https://github.com/Jude-Nwachukwu/basic-bot-traffic-identifier-template
+versions:
+  - sha: e7e26459ed46cf05ed0547924f2b405908c5a874
+    changeNotes: Initial release.
