@@ -2,5 +2,10 @@
 homepage: https://dumbdata.co/
 documentation: https://github.com/Jude-Nwachukwu/basic-bot-traffic-identifier-template
 versions:
+# LATEST VERSION
+  - sha: c0ea72e19382b86702574b961baedf1517178ae3
+    changeNotes: Updated the list of the identified bot user agents by adding more options.
+
+#INITIAL VERSION
   - sha: e7e26459ed46cf05ed0547924f2b405908c5a874
     changeNotes: Initial release.
