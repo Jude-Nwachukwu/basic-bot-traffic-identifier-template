@@ -28,7 +28,9 @@ This template allows you to enhance your bot detection strategy while providing 
      3. Use the global variable name: `navigator.webdriver`.
      4. Reference this variable in the **Bot Traffic Identifier** template.
 5. **User-Agent Detection**:
-   - Automatically detects traffic based on known bot and crawler user-agent strings.
+   - Automatically detects traffic based on known bot and crawler user-agent strings. (updated the list using [Markus Baersch's](https://www.linkedin.com/in/markusbaersch/)
+  list)
+
    - Allows you to add your own user-agent patterns to include or exclude as bots.
    - **How to Create a JavaScript Variable**:
      1. Go to **Variables** in Google Tag Manager.
