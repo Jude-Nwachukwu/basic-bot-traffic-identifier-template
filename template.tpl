@@ -10,14 +10,14 @@ ___INFO___
 
 {
   "type": "MACRO",
-  "id": "cvt_temp_public_id",
+  "id": "cvt_MQRMR",
   "version": 1,
-  "securityGroups": [],
   "displayName": "Basic Bot Traffic Identifier",
   "description": "Labels potential bot traffic as \u0027potential_bot_visitor\u0027 and non-bot traffic as \u0027real_website_visitor.\u0027 By default, bot traffic detection is enabled. You can customize this with your own rules.",
   "containerContexts": [
     "WEB"
-  ]
+  ],
+  "securityGroups": []
 }
 
 
@@ -52,14 +52,14 @@ ___TEMPLATE_PARAMETERS___
     "name": "useNavigatorWebDriver",
     "checkboxText": "Include navigator.webdriver Check in Bot Detection",
     "simpleValueType": true,
-    "help": "Select this option to check the navigator.webdriver variable during bot detection."
+    "help": "Select this option to check the navigator.webdriver variable during bot detection.\n\u003cbr\u003e\u003cbr\u003e\n🛑 Note that it may also exclude non-bot traffic, as its purpose is to filter out automated visits to the website."
   },
   {
     "type": "TEXT",
     "name": "userAgentVariable",
-    "displayName": "User Agent Variable (Optional)",
+    "displayName": "User Agent Variable (User Defined)",
     "simpleValueType": true,
-    "help": "This optional field allows you to improve bot detection by utilizing the user agent information of specific known bots.",
+    "help": "This optional field allows you to improve bot detection by utilizing the user agent information of specific known bots.\n\u003cbr\u003e\u003cbr\u003e\nTo define a variable that stores user agent information, create a JavaScript variable and assign it \u003cstrong\u003enavigator.userAgent\u003c/strong\u003e",
     "valueHint": "Example: {{js - navigator.userAgent}}",
     "enablingConditions": [
       {
@@ -227,9 +227,18 @@ if (matchesDomain(referrer, defaultBotDomains) || matchesDomain(referrer, inclus
 if (data.useUserAgent === true && typeof data.userAgentVariable === 'string') {
     const userAgent = data.userAgentVariable.toString().toLowerCase();
     const predefinedBots = [
-        'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
-        'yandexbot', 'applebot', 'petalbot', 'semrushbot', 'majestic',
-        'dotbot', 'ahrefsbot'
+      
+        'googlebot', 'adsbot-google', 'mediapartners-google', 'google search console',  
+        'chrome-lighthouse', 'duckduckbot', 'jobboersebot', 'woobot', 'pingdompagespeed',  
+        'pagepeeker', 'refindbot', 'hubspot', 'yandex', 'investment crawler', 'bingpreview',  
+        'bingbot', 'adidxbot', 'microsoftpreview', 'baiduspider', 'sogou', 'sistrix',  
+        'facebookexternalhit', 'site-shot', 'wkhtmltoimage', 'smtbot', 'petalbot', 'ahrefsbot',  
+        'avalex', 'rytebot', 'semrushbot', 'cookiebot', 'seekport crawler', 'cocolyzebot',  
+        'veoozbot', 'yisouspider', 'elisabot', 'ev-crawler', 'screeenly-bot', 'cincraw',  
+        'applebot', 'headline.com', 'seekportbot', 'bitsightbot', 'brightedge',  
+        'google-inspectiontool', 'pumoxbot', 'intl-ui-bot', 'slurp', 'yandexbot', 'majestic',
+        'dotbot', 'gptbot'  
+
     ];
     const customBotsInclusion = getDomainsFromString(data.inclusionUserAgentBot);
     const allBotsInclusion = predefinedBots.concat(customBotsInclusion).map(function (bot) {
