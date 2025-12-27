@@ -312,7 +312,7 @@ const defaultBotDomains = [
     'free-social-buttons.com', 'site3.free-floating-buttons.com', 'www.event-tracking.com',
     'success-seo.com', 'seo-platform.com', 'site2.free-floating-buttons.com', 'chinese-amezon.com',
     'hongfanji.com', 'site8.free-floating-buttons.com', 'site9.free-floating-buttons.com',
-    'video–production.com', 'www.Get-Free-Traffic-Now.com', 'buttons-for-website.com',
+    'video–production.com', 'www.get-free-traffic-now.com', 'buttons-for-website.com',
     'qualitymarketzone.com', 'site5.free-floating-buttons.co', 'videos-for-your-business.com',
     'how-to-earn-quick-money.com', 'forum.topic63020490.darodar.com', '7makemoneyonline.com',
     'acads.net', 'anal-acrobats.hol.es', 'gtm-msr.appspot.com'
@@ -382,29 +382,29 @@ if (data.useUserAgent === true && getType(data.userAgentVariable) === 'string') 
             'windows nt 5.1', 'windows nt 5.0', 'windows nt 4.0',
             'windows 3.', 'windows 2.', 'windows 1.',
 
-            // macOS
-            'mac os x 10_0', 'mac os x 10_1', 'mac os x 10_2',
-            'mac os x 10_3', 'mac os x 10_4', 'mac os x 10_5',
-            'mac os x 10_6', 'mac os x 10_7', 'mac os x 10_8',
-            'mac os x 10_9',
-
             // Android
             'android 1.', 'android 2.', 'android 3.',
             'android 4.', 'android 5.', 'android 6.', 'android 7.',
 
-            // iOS
-            'iphone os 1', 'iphone os 2', 'iphone os 3',
-            'iphone os 4', 'iphone os 5', 'iphone os 6', 'iphone os 7',
-
-            // Linux (Legacy Distributions – 2010 or earlier)
+            // Linux
             'ubuntu/9.10', 'ubuntu/8.10', 'ubuntu/8.04', 'ubuntu/7.10',
             'debian/5.0', 'debian/4.0', 'debian/3.1',
             'fedora/12', 'fedora/10', 'fedora/9',
             'opensuse/11.2', 'opensuse/11.1',
-            'linux mint/7',
-            'centos/5.4',
-            'slackware/13.0'
+            'linux mint/7', 'centos/5.4', 'slackware/13.0'
         ];
+
+        /* ---- iOS Legacy (Explicit Major Versions Only) ---- */
+        const isLegacyIOS = (
+            userAgent.indexOf('iphone os 1_') !== -1 ||
+            userAgent.indexOf('iphone os 2_') !== -1 ||
+            userAgent.indexOf('iphone os 3_') !== -1 ||
+            userAgent.indexOf('iphone os 4_') !== -1 ||
+            userAgent.indexOf('iphone os 5_') !== -1 ||
+            userAgent.indexOf('iphone os 6_') !== -1 ||
+            userAgent.indexOf('iphone os 7_') !== -1
+        );
+
 
         const legacyOverrideList = (data.UserAgentListLegacyOverride === true)
             ? getTableValues(
@@ -413,9 +413,11 @@ if (data.useUserAgent === true && getType(data.userAgentVariable) === 'string') 
               )
             : [];
 
-        const matchedLegacyOS = legacyOSSignatures.some(function (sig) {
-            return userAgent.indexOf(sig) !== -1;
-        });
+        const matchedLegacyOS =
+            legacyOSSignatures.some(function (sig) {
+                return userAgent.indexOf(sig) !== -1;
+            }) ||
+            isLegacyIOS;
 
         if (matchedLegacyOS === true) {
 
@@ -466,7 +468,6 @@ if (data.useUserAgent === true && getType(data.userAgentVariable) === 'string') 
             'dotbot', 'gptbot'
         ];
 
-        /* -------- Custom Include / Exclude Overrides -------- */
         const inclusionBots = (data.userAgentIncludeExclude === true)
             ? getDomainsFromString(data.inclusionUserAgentBot)
             : [];
@@ -475,14 +476,12 @@ if (data.useUserAgent === true && getType(data.userAgentVariable) === 'string') 
             ? getDomainsFromString(data.exclusionUserAgentBot)
             : [];
 
-        /* -------- Explicit Exclusion Always Wins -------- */
         if (exclusionBots.some(function (bot) {
             return userAgent.indexOf(bot.toLowerCase()) !== -1;
         })) {
             return 'potential_real_traffic';
         }
 
-        /* -------- Combined Bot Signature Detection -------- */
         const allBots = predefinedBots
             .concat(inclusionBots)
             .map(function (b) { return b.toLowerCase(); });
