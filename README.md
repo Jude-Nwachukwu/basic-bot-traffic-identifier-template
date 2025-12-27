@@ -108,19 +108,6 @@ This detection works automatically once enabled—no manual input required.
 
 ---
 
-### macOS (Legacy)
-
-| macOS Version | Release Year |
-|--------------|-------------|
-| Mac OS X 10.0 – 10.4 | 2001–2005 |
-| Mac OS X 10.5 (Leopard) | 2007 |
-| Mac OS X 10.6 (Snow Leopard) | 2009 |
-| Mac OS X 10.7 (Lion) | 2011 |
-| Mac OS X 10.8 (Mountain Lion) | 2012 |
-| Mac OS X 10.9 (Mavericks) | 2013 |
-
----
-
 ### Linux (Legacy Distributions – 2010 or Earlier)
 
 | Distribution | Version | Release Year |
