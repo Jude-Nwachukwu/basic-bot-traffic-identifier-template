@@ -222,6 +222,14 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ]
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "userAgentExcludeAllLinux",
+        "checkboxText": "🚨Automatically Classify and Exclude All Linux as Bot Traffic",
+        "simpleValueType": true,
+        "help": "🛑 Consider this properly before enabling this option, because what it does is to classify all Linux visits as bot traffic.",
+        "enablingConditions": []
       }
     ],
     "enablingConditions": [
@@ -265,6 +273,35 @@ ___TEMPLATE_PARAMETERS___
     "checkboxText": "Mark .appspot.com Visits As Bot Traffic",
     "simpleValueType": true,
     "help": "Enable this option to classify visits originating from appspot.com domains (e.g., gtm-msr.appspot.com) as \"potential_bot_traffic\""
+  },
+  {
+    "type": "GROUP",
+    "name": "excludeUsingPageProperties",
+    "displayName": "Exclude Bot Traffic Using Missing Page Properties",
+    "groupStyle": "ZIPPY_OPEN",
+    "subParams": [
+      {
+        "type": "CHECKBOX",
+        "name": "excludeBotwithoutDomainInfo",
+        "checkboxText": "Mark Visits without Hostname/Domain as Bot Traffic",
+        "simpleValueType": true,
+        "help": "Enable this option to classify visits originating from website that doesn\u0027t have domain or hostname information as \"potential_bot_traffic\""
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "excludeBotwithoutPageTitle",
+        "checkboxText": "Mark Visits without PageTitle as Bot Traffic",
+        "simpleValueType": true,
+        "help": "Enable this option to classify visits originating from website that doesn\u0027t have document.title information as \"potential_bot_traffic\""
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "excludeBotwithoutPageUrl",
+        "checkboxText": "Mark Visits without Page Url as Bot Traffic",
+        "simpleValueType": true,
+        "help": "Enable this option to classify visits originating from website that doesn\u0027t have page URL information as \"potential_bot_traffic\""
+      }
+    ]
   }
 ]
 
@@ -274,6 +311,7 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 const queryPermission = require('queryPermission');
 const getReferrerUrl = require('getReferrerUrl');
 const getUrl = require('getUrl');
+const readTitle = require('readTitle');
 const setCookie = require('setCookie');
 const getCookieValues = require('getCookieValues');
 const getType = require('getType');
@@ -298,6 +336,19 @@ function getTableValues(table, key) {
         .map(function (row) { return row[key]; })
         .filter(function (v) { return getType(v) === 'string' && v.length > 0; })
         .map(function (v) { return v.toLowerCase(); });
+}
+
+/* Returns true when a page property is undefined, null, empty, or a "not set" style placeholder */
+function isMissingValue(value) {
+    if (value === undefined || value === null) return true;
+    if (getType(value) !== 'string') return true;
+    const cleaned = value.trim().toLowerCase();
+    return cleaned === '' ||
+        cleaned === 'undefined' ||
+        cleaned === 'null' ||
+        cleaned === 'not set' ||
+        cleaned === '(not set)' ||
+        cleaned === '(not provided)';
 }
 
 /* ------------------ Default Bot Domains ------------------ */
@@ -339,6 +390,40 @@ if (queryPermission('get_cookies', cookieName)) {
 if (data.excludeAppspotDomain === true && queryPermission('get_url', 'host')) {
     const host = getUrl('host');
     if (getType(host) === 'string' && host.indexOf('.appspot.com') !== -1) {
+        if (queryPermission('set_cookies', cookieName, cookieOptions)) {
+            setCookie(cookieName, 'potential_bot_traffic', cookieOptions);
+        }
+        return 'potential_bot_traffic';
+    }
+}
+
+/* ------------------ Missing Page Properties ------------------ */
+/* Each check only runs if its checkbox is enabled AND the permission is granted,
+   so a missing permission can never cause a false bot label. */
+
+// Missing hostname / domain
+if (data.excludeBotwithoutDomainInfo === true && queryPermission('get_url', 'host')) {
+    if (isMissingValue(getUrl('host'))) {
+        if (queryPermission('set_cookies', cookieName, cookieOptions)) {
+            setCookie(cookieName, 'potential_bot_traffic', cookieOptions);
+        }
+        return 'potential_bot_traffic';
+    }
+}
+
+// Missing document.title
+if (data.excludeBotwithoutPageTitle === true && queryPermission('read_title')) {
+    if (isMissingValue(readTitle())) {
+        if (queryPermission('set_cookies', cookieName, cookieOptions)) {
+            setCookie(cookieName, 'potential_bot_traffic', cookieOptions);
+        }
+        return 'potential_bot_traffic';
+    }
+}
+
+// Missing page URL (full URL)
+if (data.excludeBotwithoutPageUrl === true && queryPermission('get_url')) {
+    if (isMissingValue(getUrl())) {
         if (queryPermission('set_cookies', cookieName, cookieOptions)) {
             setCookie(cookieName, 'potential_bot_traffic', cookieOptions);
         }
@@ -445,6 +530,17 @@ if (data.useUserAgent === true && getType(data.userAgentVariable) === 'string') 
         if (customOSVersions.some(function (v) {
             return userAgent.indexOf(v) !== -1;
         })) {
+            if (queryPermission('set_cookies', cookieName, cookieOptions)) {
+                setCookie(cookieName, 'potential_bot_traffic', cookieOptions);
+            }
+            return 'potential_bot_traffic';
+        }
+    }
+
+    /* -------- Exclude All Linux (Desktop Linux Only, Android Excluded) -------- */
+    if (data.userAgentExcludeAllLinux === true) {
+        // Android user agents contain "Linux; Android", so Android is skipped here
+        if (userAgent.indexOf('linux') !== -1 && userAgent.indexOf('android') === -1) {
             if (queryPermission('set_cookies', cookieName, cookieOptions)) {
                 setCookie(cookieName, 'potential_bot_traffic', cookieOptions);
             }
@@ -665,6 +761,13 @@ ___WEB_PERMISSIONS___
           }
         },
         {
+          "key": "path",
+          "value": {
+            "type": 8,
+            "boolean": true
+          }
+        },
+        {
           "key": "host",
           "value": {
             "type": 8,
@@ -684,6 +787,16 @@ ___WEB_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "read_title",
+        "versionId": "1"
+      },
+      "param": []
+    },
+    "isRequired": true
   }
 ]
 
@@ -691,6 +804,7 @@ ___WEB_PERMISSIONS___
 ___TESTS___
 
 scenarios: []
+setup: ''
 
 
 ___NOTES___
