@@ -3,10 +3,12 @@ homepage: https://dumbdata.co/
 documentation: https://github.com/Jude-Nwachukwu/basic-bot-traffic-identifier-template
 versions:
 # LATEST VERSION
-  - sha: 201be0588a9c7b5354018940b12545220181bfda
-    changeNotes: Remove mac os legacy filtering support.
+  - sha: f0081ccc9fe15b37a5b243a9db9af74a68399531
+    changeNotes: Added missing hostname, page title and page URL checks, plus an option to classify desktop Linux (non-Android) traffic as bot traffic.
 
 #INITIAL VERSION
+  - sha: 201be0588a9c7b5354018940b12545220181bfda
+    changeNotes: Remove mac os legacy filtering support.
   - sha: 6c515c89d0ddb7c596113bccdbb9e90392fe0764
     changeNotes: Support legacy os versions filtering.
   - sha: c0ea72e19382b86702574b961baedf1517178ae3
